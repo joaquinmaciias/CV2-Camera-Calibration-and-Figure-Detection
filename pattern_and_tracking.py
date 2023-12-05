@@ -1,15 +1,11 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-import time
-from datetime import datetime
+
 import copy
 import mediapipe as mp
 
 from pprint import pprint as pp
 from picamera2 import Picamera2
-
-from collections import Counter
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -40,7 +36,6 @@ def identify_figure(image):
             cx = int(moments["m10"] / moments["m00"])
             cy = int(moments["m01"] / moments["m00"])
 
-            # Aproximar el contorno a una forma geométrica (triángulo, cuadrado, círculo)
             aprox = cv2.approxPolyDP(contour, 0.02 * cv2.arcLength(contour, True), True)
 
             # Dibujar el contorno y el centro en la imagen original
@@ -59,6 +54,49 @@ def identify_figure(image):
                     figure = "SQUARE"
 
     return figure
+
+
+"""
+def identify_figure(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    edges = cv2.Canny(blurred, 50, 150)
+
+    # Encontrar contornos en la imagen
+    contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    figure = None
+    for contour in contours:
+        # Calcular los momentos del contorno
+        moments = cv2.moments(contour)
+        
+        # Calcular el centro del contorno
+        if moments["m00"] != 0:
+            cx = int(moments["m10"] / moments["m00"])
+            cy = int(moments["m01"] / moments["m00"])
+
+            # Aproximar el contorno a una forma geométrica (triángulo, cuadrado, pentágono)
+            epsilon = 0.04 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            # Dibujar el contorno y el centro en la imagen original
+            cv2.drawContours(image, [approx], 0, (0, 255, 0), 2)
+            cv2.circle(image, (cx, cy), 5, (255, 255, 255), -1)
+
+            # Determinar la forma en función del número de vértices
+            num_vertices = len(approx)
+            if num_vertices == 3:
+                figure = "TRIANGLE"
+            elif num_vertices == 4:
+                figure = "SQUARE"
+            elif num_vertices == 5:
+                figure = "PENTAGON"
+
+    return figure
+"""
+
 
 
 def count_fingers(multi_hand_landmarks, state):
